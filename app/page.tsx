@@ -1,18 +1,26 @@
-export default function HomePage() {
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../pages/api/auth/[...nextauth]";
+import Navbar from '../components/Navbar';
+
+interface User {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role?: 'CANDIDATE' | 'RECRUITER';
+}
+
+interface Session {
+  user?: User;
+  expires: string;
+}
+
+export default async function HomePage() {
+  const session = (await getServerSession(authOptions)) as Session | null;
+  const user = session?.user;
+
   return (
     <main className="min-h-screen px-6 py-12 mx-auto max-w-6xl">
-      <nav className="flex items-center justify-between mb-10">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-600 rounded flex items-center justify-center text-white font-bold">SM</div>
-          <span className="font-semibold text-lg">SkillMatch</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <a href="#" className="text-gray-700 hover:underline">Jobs</a>
-          <a href="#" className="text-gray-700 hover:underline">Companies</a>
-          <a href="#" className="text-gray-700 hover:underline">Resources</a>
-          <a href="/login" className="px-4 py-2 bg-indigo-600 text-white rounded-md">Login</a>
-        </div>
-      </nav>
+  <Navbar />
 
       <header className="mb-12">
         <div className="grid md:grid-cols-2 gap-8 items-center">

@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+// Removed auto sign-in; we'll redirect user to login page after successful registration.
 
 const schema = z.object({
   name: z.string().min(2),
@@ -23,13 +23,16 @@ export default function RegisterPage() {
   async function onSubmit(values: { name: string; email: string; password: string; role: 'CANDIDATE' | 'RECRUITER' }) {
     const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values) });
     if (!res.ok) {
-      const err = await res.json();
-      alert(err?.error || 'Registration failed');
+      let msg = 'Registration failed';
+      try {
+        const err = await res.json();
+        if (err?.error) msg = typeof err.error === 'string' ? err.error : 'Invalid data';
+      } catch {}
+      alert(msg);
       return;
     }
-    // auto-login after register
-    await signIn('credentials', { redirect: false, email: values.email, password: values.password });
-    router.push('/');
+    // Redirect to login with a flag so we can show a success message there
+    router.replace('/login?registered=1');
   }
 
   return (
