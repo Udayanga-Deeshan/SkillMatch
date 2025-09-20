@@ -5,7 +5,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../pages/api/auth/[...nextauth]";
 import AuthInit from "../components/AuthInit";
 import SessionProvider from "../components/SessionProvider";
-import AuthDebug from "../components/AuthDebug";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +32,6 @@ export default function RootLayout({
         <SessionProvider>
           <AuthInit />
           {children}
-          <AuthDebug />
         </SessionProvider>
       </body>
     </html>

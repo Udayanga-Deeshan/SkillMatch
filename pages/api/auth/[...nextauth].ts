@@ -25,7 +25,7 @@ export const authOptions: any = {
   ],
   // Revert to JWT strategy because Credentials provider requires it
   session: { strategy: "jwt", maxAge: 60 * 60 * 24 * 7 },
-  debug: true, // Remove this in production
+  debug: false, // Disabled for production
   secret: process.env.NEXTAUTH_SECRET ?? "AB6E7C8D9F0G1H2I3J4K5L6M7N8O9P0",
   callbacks: {
     async jwt({ token, user }: { token: any; user?: any }) {

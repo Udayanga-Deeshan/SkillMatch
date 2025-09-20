@@ -1,33 +1,110 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../../pages/api/auth/[...nextauth]';
-import { redirect } from 'next/navigation';
-import { prisma } from '../../../lib/prisma';
+"use client";
+
+import React, { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useAtom } from 'jotai';
+import {
+  jobsAtom,
+  jobsStatsAtom,
+  jobsLoadingAtom,
+  jobsErrorAtom,
+  fetchJobsAtom,
+} from '../../../atoms/jobAtom';
 import Navbar from '../../../components/Navbar';
+import DashboardStats from '../../../components/recruiter/DashboardStats';
+import JobFilters from '../../../components/recruiter/JobFilters';
+import JobsList from '../../../components/recruiter/JobsList';
+import JobForm from '../../../components/recruiter/JobForm';
+import ErrorBoundary from '../../../components/ErrorBoundary';
 
-export default async function RecruiterDashboardPage() {
-  const session = await getServerSession(authOptions as any) as any;
-  if (!session?.user) redirect('/login');
-  if (session.user.role !== 'RECRUITER') redirect('/unauthorized');
+function RecruiterDashboardContent() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [jobs] = useAtom(jobsAtom);
+  const [stats] = useAtom(jobsStatsAtom);
+  const [isLoading] = useAtom(jobsLoadingAtom);
+  const [error] = useAtom(jobsErrorAtom);
+  const [, fetchJobs] = useAtom(fetchJobsAtom);
 
-  const jobs = await prisma.job.findMany({
-    where: { recruiterId: session.user.id },
-    orderBy: { createdAt: 'desc' }
-  });
+  useEffect(() => {
+    if (status === 'loading') return;
+    
+    if (!session?.user) {
+      router.push('/login');
+      return;
+    }
+    
+    const user = session.user as any;
+    if (user.role !== 'RECRUITER') {
+      router.push('/unauthorized');
+      return;
+    }
+
+    // Fetch jobs on component mount
+    fetchJobs();
+  }, [session, status, router, fetchJobs]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (!session?.user) return null;
+
+  const user = session.user as any;
+  if (user.role !== 'RECRUITER') return null;
 
   return (
-    <div className="px-6 py-8 max-w-6xl mx-auto">
-      <Navbar />
-      <h1 className="text-2xl font-semibold mb-4">Recruiter dashboard</h1>
-      <p className="text-gray-600 mb-6">Manage your job postings.</p>
-      <ul className="space-y-3">
-  {jobs.map((job: any) => (
-          <li key={job.id} className="p-4 border rounded-md">
-            <div className="font-medium">{job.title}</div>
-            <div className="text-sm text-gray-600">{job.location}</div>
-          </li>
-        ))}
-        {jobs.length === 0 && <li className="text-gray-500">No jobs posted yet.</li>}
-      </ul>
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-6 py-8 max-w-7xl mx-auto">
+        <Navbar />
+        
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome back, {user.name?.split(' ')[0] || 'Recruiter'}!
+          </h1>
+          <p className="text-gray-600">
+            Manage your job postings and track applications from your dashboard.
+          </p>
+        </div>
+
+        {/* Stats */}
+        <DashboardStats stats={stats} isLoading={isLoading} />
+
+        {/* Filters */}
+        <JobFilters />
+
+        {/* Jobs List */}
+        <JobsList />
+
+        {/* Job Form Modal */}
+        <JobForm />
+
+        {/* Error Display */}
+        {error && (
+          <div className="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {error}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
+  );
+}
+
+export default function RecruiterDashboardPage() {
+  return (
+    <ErrorBoundary>
+      <RecruiterDashboardContent />
+    </ErrorBoundary>
   );
 }

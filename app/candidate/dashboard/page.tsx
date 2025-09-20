@@ -46,7 +46,6 @@ export default async function CandidateDashboardPage() {
       <p className="text-gray-600 mb-6">Browse available roles and apply directly.</p>
       <AuthInit />
       <CandidateDashboardClient jobs={safeJobs} appliedJobIds={appliedJobIds} />
-      <div className="mt-8 text-xs text-gray-400">Debug: role={session.user.role}</div>
     </div>
   );
 }
