@@ -1,51 +1,60 @@
-import React from 'react';
-import { prisma } from '../../../lib/prisma';
-import CandidateDashboardClient from '../../../components/CandidateDashboardClient';
-import AuthInit from '../../../components/AuthInit';
+"use client";
+
+import React, { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useAtom } from 'jotai';
+import {
+  candidateJobsAtom,
+  candidateApplicationsAtom,
+  candidateStatsAtom,
+  fetchCandidateDataAtom,
+} from '../../../atoms/candidateAtom';
 import Navbar from '../../../components/Navbar';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../../pages/api/auth/[...nextauth]';
-import { redirect } from 'next/navigation';
+import CandidateDashboard from '../../../components/candidate/CandidateDashboard';
 
-type JobForClient = {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  salary: number | null;
-  recruiter: { id: string; name: string } | null;
-};
+export default function CandidateDashboardPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [, fetchCandidateData] = useAtom(fetchCandidateDataAtom);
 
-export default async function CandidateDashboardPage() {
-  const session = await getServerSession(authOptions as any) as any;
-  if (!session?.user) redirect('/login');
-  if (session.user.role !== 'CANDIDATE') redirect('/unauthorized');
+  useEffect(() => {
+    if (status === 'loading') return;
+    
+    if (!session?.user) {
+      router.push('/login');
+      return;
+    }
+    
+    const user = session.user as any;
+    if (user.role !== 'CANDIDATE') {
+      router.push('/unauthorized');
+      return;
+    }
 
-  const jobs = await prisma.job.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: { recruiter: { select: { id: true, name: true } } },
-  });
+    // Initialize candidate data
+    fetchCandidateData();
+  }, [session, status, router, fetchCandidateData]);
 
-  const safeJobs: JobForClient[] = jobs.map((j: any) => ({
-    id: j.id,
-    title: j.title,
-    description: j.description,
-    location: j.location,
-    salary: j.salary ?? null,
-    recruiter: j.recruiter ? { id: j.recruiter.id, name: j.recruiter.name } : null,
-  }));
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
-  // fetch candidate's applications
-  const apps = await prisma.application.findMany({ where: { candidateId: session.user.id }, include: { job: { select: { id: true } } } });
-  const appliedJobIds = apps.map((a: any) => a.jobId);
+  if (!session?.user) return null;
+
+  const user = session.user as any;
+  if (user.role !== 'CANDIDATE') return null;
 
   return (
-    <div className="px-6 py-8 max-w-6xl mx-auto">
-      <Navbar />
-      <h1 className="text-2xl font-semibold mb-4">Candidate dashboard</h1>
-      <p className="text-gray-600 mb-6">Browse available roles and apply directly.</p>
-      <AuthInit />
-      <CandidateDashboardClient jobs={safeJobs} appliedJobIds={appliedJobIds} />
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-6 py-8 max-w-7xl mx-auto">
+        <Navbar />
+        <CandidateDashboard />
+      </div>
     </div>
   );
 }

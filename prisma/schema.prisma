@@ -26,6 +26,7 @@ model Job {
   title       String
   description String
   location    String
+  company     String   @default("Unknown Company")
   salary      Int?
   createdAt   DateTime @default(now())
 

@@ -8,6 +8,7 @@ const jobSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters').max(5000, 'Description must be less than 5000 characters'),
   location: z.string().min(1, 'Location is required').max(100, 'Location must be less than 100 characters'),
+  company: z.string().min(1, 'Company name is required').max(100, 'Company name must be less than 100 characters'),
   salary: z.number().min(0, 'Salary must be positive').nullable(),
 });
 

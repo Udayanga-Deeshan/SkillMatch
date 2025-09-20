@@ -5,6 +5,7 @@ export type Job = {
   title: string;
   description: string;
   location: string;
+  company: string;
   salary: number | null;
   createdAt: string;
   recruiterId: string;
@@ -17,6 +18,7 @@ export type JobFormData = {
   title: string;
   description: string;
   location: string;
+  company: string;
   salary: number | null;
 };
 
@@ -59,7 +61,8 @@ export const filteredJobsAtom = atom((get) => {
     const matchesSearch = 
       job.title.toLowerCase().includes(search) ||
       job.description.toLowerCase().includes(search) ||
-      job.location.toLowerCase().includes(search);
+      job.location.toLowerCase().includes(search) ||
+      job.company.toLowerCase().includes(search);
 
     const matchesLocation = !locationFilter || 
       job.location.toLowerCase().includes(locationFilter.toLowerCase());

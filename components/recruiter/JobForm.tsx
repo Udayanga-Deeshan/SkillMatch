@@ -22,6 +22,7 @@ export default function JobForm() {
     title: selectedJob?.title || '',
     description: selectedJob?.description || '',
     location: selectedJob?.location || '',
+    company: selectedJob?.company || '',
     salary: selectedJob?.salary || null,
   });
 
@@ -35,6 +36,7 @@ export default function JobForm() {
         title: selectedJob.title,
         description: selectedJob.description,
         location: selectedJob.location,
+        company: selectedJob.company,
         salary: selectedJob.salary,
       });
     } else if (!editMode) {
@@ -42,6 +44,7 @@ export default function JobForm() {
         title: '',
         description: '',
         location: '',
+        company: '',
         salary: null,
       });
     }
@@ -68,6 +71,12 @@ export default function JobForm() {
       newErrors.location = 'Location is required';
     } else if (formData.location.length > 100) {
       newErrors.location = 'Location must be less than 100 characters';
+    }
+
+    if (!formData.company.trim()) {
+      newErrors.company = 'Company name is required';
+    } else if (formData.company.length > 100) {
+      newErrors.company = 'Company name must be less than 100 characters';
     }
 
     if (formData.salary !== null && formData.salary < 0) {
@@ -105,6 +114,7 @@ export default function JobForm() {
       title: '',
       description: '',
       location: '',
+      company: '',
       salary: null,
     });
     setErrors({});
@@ -148,6 +158,24 @@ export default function JobForm() {
                 disabled={isSubmitting}
               />
               {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+            </div>
+
+            <div>
+              <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
+                Company Name *
+              </label>
+              <input
+                type="text"
+                id="company"
+                value={formData.company}
+                onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                  errors.company ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="e.g. TechCorp Inc."
+                disabled={isSubmitting}
+              />
+              {errors.company && <p className="mt-1 text-sm text-red-600">{errors.company}</p>}
             </div>
 
             <div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useAtom } from 'jotai';
@@ -16,6 +16,7 @@ import DashboardStats from '../../../components/recruiter/DashboardStats';
 import JobFilters from '../../../components/recruiter/JobFilters';
 import JobsList from '../../../components/recruiter/JobsList';
 import JobForm from '../../../components/recruiter/JobForm';
+import ViewApplications from '../../../components/recruiter/ViewApplications';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 
 function RecruiterDashboardContent() {
@@ -26,6 +27,7 @@ function RecruiterDashboardContent() {
   const [isLoading] = useAtom(jobsLoadingAtom);
   const [error] = useAtom(jobsErrorAtom);
   const [, fetchJobs] = useAtom(fetchJobsAtom);
+  const [activeTab, setActiveTab] = useState('jobs');
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -73,17 +75,54 @@ function RecruiterDashboardContent() {
           </p>
         </div>
 
-        {/* Stats */}
-        <DashboardStats stats={stats} isLoading={isLoading} />
+        {/* Tab Navigation */}
+        <div className="mb-8">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('jobs')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'jobs'
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Job Management
+              </button>
+              <button
+                onClick={() => setActiveTab('applications')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'applications'
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Application Management
+              </button>
+            </nav>
+          </div>
+        </div>
 
-        {/* Filters */}
-        <JobFilters />
+        {/* Tab Content */}
+        {activeTab === 'jobs' && (
+          <>
+            {/* Stats */}
+            <DashboardStats stats={stats} isLoading={isLoading} />
 
-        {/* Jobs List */}
-        <JobsList />
+            {/* Filters */}
+            <JobFilters />
 
-        {/* Job Form Modal */}
-        <JobForm />
+            {/* Jobs List */}
+            <JobsList />
+
+            {/* Job Form Modal */}
+            <JobForm />
+          </>
+        )}
+
+        {activeTab === 'applications' && (
+          <ViewApplications />
+        )}
 
         {/* Error Display */}
         {error && (
