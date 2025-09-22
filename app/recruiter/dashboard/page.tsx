@@ -11,6 +11,7 @@ import {
   jobsErrorAtom,
   fetchJobsAtom,
 } from '../../../atoms/jobAtom';
+import { applicationJobFilterAtom } from '../../../atoms/applicationAtom';
 import Navbar from '../../../components/Navbar';
 import DashboardStats from '../../../components/recruiter/DashboardStats';
 import JobFilters from '../../../components/recruiter/JobFilters';
@@ -27,7 +28,9 @@ function RecruiterDashboardContent() {
   const [isLoading] = useAtom(jobsLoadingAtom);
   const [error] = useAtom(jobsErrorAtom);
   const [, fetchJobs] = useAtom(fetchJobsAtom);
+  const [, setJobFilter] = useAtom(applicationJobFilterAtom);
   const [activeTab, setActiveTab] = useState('jobs');
+  const [selectedJobTitle, setSelectedJobTitle] = useState<string>('');
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -46,6 +49,17 @@ function RecruiterDashboardContent() {
     // Fetch jobs on component mount
     fetchJobs();
   }, [session, status, router, fetchJobs]);
+
+  const handleViewApplicationsForJob = (jobId: string, jobTitle: string) => {
+    setJobFilter(jobId);
+    setSelectedJobTitle(jobTitle);
+    setActiveTab('applications');
+  };
+
+  const handleBackToAllApplications = () => {
+    setJobFilter(null);
+    setSelectedJobTitle('');
+  };
 
   if (status === 'loading') {
     return (
@@ -113,7 +127,7 @@ function RecruiterDashboardContent() {
             <JobFilters />
 
             {/* Jobs List */}
-            <JobsList />
+            <JobsList onViewApplications={handleViewApplicationsForJob} />
 
             {/* Job Form Modal */}
             <JobForm />
@@ -121,7 +135,10 @@ function RecruiterDashboardContent() {
         )}
 
         {activeTab === 'applications' && (
-          <ViewApplications />
+          <ViewApplications 
+            selectedJobTitle={selectedJobTitle}
+            onBackToAllApplications={handleBackToAllApplications}
+          />
         )}
 
         {/* Error Display */}

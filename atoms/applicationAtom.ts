@@ -109,12 +109,14 @@ export const updateApplicationStatusAtom = atom(
 // Filter atoms
 export const applicationStatusFilterAtom = atom<string>('ALL');
 export const applicationSearchTermAtom = atom<string>('');
+export const applicationJobFilterAtom = atom<string | null>(null);
 
 // Computed filtered applications
 export const computedFilteredApplicationsAtom = atom<Application[]>((get) => {
   const applications = get(applicationsAtom);
   const statusFilter = get(applicationStatusFilterAtom);
   const searchTerm = get(applicationSearchTermAtom);
+  const jobFilter = get(applicationJobFilterAtom);
   
   return applications.filter(app => {
     const matchesStatus = statusFilter === 'ALL' || app.status === statusFilter;
@@ -122,7 +124,8 @@ export const computedFilteredApplicationsAtom = atom<Application[]>((get) => {
       app.candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       app.candidate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       app.job.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesJob = !jobFilter || app.job.id === jobFilter;
     
-    return matchesStatus && matchesSearch;
+    return matchesStatus && matchesSearch && matchesJob;
   });
 });

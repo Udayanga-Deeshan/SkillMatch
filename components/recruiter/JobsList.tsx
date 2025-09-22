@@ -14,7 +14,11 @@ import {
 } from '../../atoms/jobAtom';
 import JobCard from './JobCard';
 
-export default function JobsList() {
+interface JobsListProps {
+  onViewApplications?: (jobId: string, jobTitle: string) => void;
+}
+
+export default function JobsList({ onViewApplications }: JobsListProps) {
   const [jobs] = useAtom(filteredJobsAtom);
   const [isLoading] = useAtom(jobsLoadingAtom);
   const [error] = useAtom(jobsErrorAtom);
@@ -36,8 +40,12 @@ export default function JobsList() {
   };
 
   const handleViewApplications = (job: Job) => {
-    // TODO: Implement applications view
-    alert('Applications view will be implemented in the next phase.');
+    if (onViewApplications) {
+      onViewApplications(job.id, job.title);
+    } else {
+      // Fallback for when used without the prop
+      alert('Applications view will be implemented in the next phase.');
+    }
   };
 
   if (isLoading) {
