@@ -1,11 +1,22 @@
 import { atom } from 'jotai';
 
+export type JobCategory = 'IT_SOFTWARE' | 'SALES_MARKETING' | 'FINANCE_ACCOUNTING' | 'HR_ADMINISTRATION' | 'ENGINEERING_MANUFACTURING';
+
+export const JOB_CATEGORIES = {
+  IT_SOFTWARE: 'Information Technology (IT) & Software',
+  SALES_MARKETING: 'Sales & Marketing',
+  FINANCE_ACCOUNTING: 'Finance & Accounting',
+  HR_ADMINISTRATION: 'Human Resources (HR) & Administration',
+  ENGINEERING_MANUFACTURING: 'Engineering & Manufacturing',
+} as const;
+
 export type Job = {
   id: string;
   title: string;
   description: string;
   location: string;
   company: string;
+  category: JobCategory;
   salary: number | null;
   createdAt: string;
   recruiterId: string;
@@ -19,6 +30,7 @@ export type JobFormData = {
   description: string;
   location: string;
   company: string;
+  category: JobCategory;
   salary: number | null;
 };
 

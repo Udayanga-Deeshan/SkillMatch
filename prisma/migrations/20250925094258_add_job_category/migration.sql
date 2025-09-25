@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "public"."JobCategory" AS ENUM ('IT_SOFTWARE', 'SALES_MARKETING', 'FINANCE_ACCOUNTING', 'HR_ADMINISTRATION', 'ENGINEERING_MANUFACTURING');
+
+-- AlterTable
+ALTER TABLE "public"."Job" ADD COLUMN     "category" "public"."JobCategory" NOT NULL DEFAULT 'IT_SOFTWARE';

@@ -12,6 +12,7 @@ import {
   selectedJobAtom,
   jobDetailsModalOpenAtom,
 } from '../../atoms/candidateAtom';
+import { JOB_CATEGORIES } from '../../atoms/jobAtom';
 
 interface JobCardProps {
   job: JobForCandidate;
@@ -101,6 +102,13 @@ export default function JobCard({ job }: JobCardProps) {
               </svg>
               {formatSalary(job.salary)}
             </div>
+          </div>
+          
+          {/* Category Badge */}
+          <div className="mb-3">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+              {JOB_CATEGORIES[job.category]}
+            </span>
           </div>
         </div>
         

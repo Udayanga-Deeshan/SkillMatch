@@ -22,13 +22,14 @@ model User {
 }
 
 model Job {
-  id          String   @id @default(uuid())
+  id          String      @id @default(uuid())
   title       String
   description String
   location    String
-  company     String   @default("Unknown Company")
+  company     String      @default("Unknown Company")
+  category    JobCategory @default(IT_SOFTWARE)
   salary      Int?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime    @default(now())
 
   recruiter   User      @relation("RecruiterJobs", fields: [recruiterId], references: [id])
   recruiterId String
@@ -77,5 +78,13 @@ enum AppStatus {
   SHORTLISTED
   REJECTED
   HIRED
+}
+
+enum JobCategory {
+  IT_SOFTWARE
+  SALES_MARKETING
+  FINANCE_ACCOUNTING
+  HR_ADMINISTRATION
+  ENGINEERING_MANUFACTURING
 }
 

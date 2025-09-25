@@ -6,6 +6,7 @@ export type JobForCandidate = {
   description: string;
   location: string;
   company: string;
+  category: 'IT_SOFTWARE' | 'SALES_MARKETING' | 'FINANCE_ACCOUNTING' | 'HR_ADMINISTRATION' | 'ENGINEERING_MANUFACTURING';
   salary: number | null;
   createdAt: string;
   recruiter: { id: string; name: string } | null;

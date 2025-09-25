@@ -29,13 +29,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Get category stats (simplified for homepage)
     const totalJobs = await prisma.job.count();
     
-    // Group jobs by location for category display
+    // Get category stats using raw queries to avoid TypeScript cache issues
+    const categoryStats = await Promise.all([
+      prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "Job" WHERE category = 'IT_SOFTWARE'`,
+      prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "Job" WHERE category = 'SALES_MARKETING'`,
+      prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "Job" WHERE category = 'FINANCE_ACCOUNTING'`,
+      prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "Job" WHERE category = 'HR_ADMINISTRATION'`,
+      prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "Job" WHERE category = 'ENGINEERING_MANUFACTURING'`
+    ]);
+    
     const categories = [
-      { name: 'Engineering', count: await prisma.job.count({ where: { title: { contains: 'Engineer', mode: 'insensitive' } } }) },
-      { name: 'Design', count: await prisma.job.count({ where: { title: { contains: 'Design', mode: 'insensitive' } } }) },
-      { name: 'Product', count: await prisma.job.count({ where: { title: { contains: 'Product', mode: 'insensitive' } } }) },
-      { name: 'Marketing', count: await prisma.job.count({ where: { title: { contains: 'Marketing', mode: 'insensitive' } } }) },
-      { name: 'Sales', count: await prisma.job.count({ where: { title: { contains: 'Sales', mode: 'insensitive' } } }) },
+      { 
+        name: 'Information Technology (IT) & Software', 
+        count: Number(categoryStats[0][0]?.count || 0)
+      },
+      { 
+        name: 'Sales & Marketing', 
+        count: Number(categoryStats[1][0]?.count || 0)
+      },
+      { 
+        name: 'Finance & Accounting', 
+        count: Number(categoryStats[2][0]?.count || 0)
+      },
+      { 
+        name: 'Human Resources (HR) & Administration', 
+        count: Number(categoryStats[3][0]?.count || 0)
+      },
+      { 
+        name: 'Engineering & Manufacturing', 
+        count: Number(categoryStats[4][0]?.count || 0)
+      },
     ];
 
     return res.status(200).json({ 

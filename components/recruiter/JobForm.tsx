@@ -8,7 +8,9 @@ import {
   selectedJobAtom, 
   createJobAtom, 
   updateJobAtom, 
-  JobFormData 
+  JobFormData,
+  JOB_CATEGORIES,
+  JobCategory
 } from '../../atoms/jobAtom';
 
 export default function JobForm() {
@@ -23,6 +25,7 @@ export default function JobForm() {
     description: selectedJob?.description || '',
     location: selectedJob?.location || '',
     company: selectedJob?.company || '',
+    category: selectedJob?.category || 'IT_SOFTWARE',
     salary: selectedJob?.salary || null,
   });
 
@@ -37,6 +40,7 @@ export default function JobForm() {
         description: selectedJob.description,
         location: selectedJob.location,
         company: selectedJob.company,
+        category: selectedJob.category,
         salary: selectedJob.salary,
       });
     } else if (!editMode) {
@@ -45,6 +49,7 @@ export default function JobForm() {
         description: '',
         location: '',
         company: '',
+        category: 'IT_SOFTWARE',
         salary: null,
       });
     }
@@ -79,6 +84,10 @@ export default function JobForm() {
       newErrors.company = 'Company name must be less than 100 characters';
     }
 
+    if (!formData.category) {
+      newErrors.category = 'Job category is required';
+    }
+
     if (formData.salary !== null && formData.salary < 0) {
       newErrors.salary = 'Salary must be positive';
     }
@@ -94,6 +103,7 @@ export default function JobForm() {
 
     setIsSubmitting(true);
     try {
+      console.log('Submitting job form with data:', formData); // Debug log
       if (editMode && selectedJob) {
         await updateJob({ id: selectedJob.id, jobData: formData });
       } else {
@@ -102,6 +112,8 @@ export default function JobForm() {
       handleClose();
     } catch (error) {
       console.error('Error submitting form:', error);
+      // Show user-friendly error message
+      setErrors({ submit: 'Failed to save job. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
@@ -115,6 +127,7 @@ export default function JobForm() {
       description: '',
       location: '',
       company: '',
+      category: 'IT_SOFTWARE',
       salary: null,
     });
     setErrors({});
@@ -179,6 +192,28 @@ export default function JobForm() {
             </div>
 
             <div>
+              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                Job Category *
+              </label>
+              <select
+                id="category"
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as JobCategory })}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                  errors.category ? 'border-red-300' : 'border-gray-300'
+                }`}
+                disabled={isSubmitting}
+              >
+                {Object.entries(JOB_CATEGORIES).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+              {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category}</p>}
+            </div>
+
+            <div>
               <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
                 Location *
               </label>
@@ -239,6 +274,12 @@ export default function JobForm() {
                 {formData.description.length}/5000 characters
               </p>
             </div>
+
+            {errors.submit && (
+              <div className="mb-4">
+                <p className="text-sm text-red-600">{errors.submit}</p>
+              </div>
+            )}
 
             <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
               <button
